@@ -1,0 +1,117 @@
+version: "1.0"
+policy_name: "agenttrap-policy"
+default_action: ALLOW
+
+ingress_rules:
+  - name: block_injection
+    priority: 100
+    action: DENY
+    deny_message: "[AGENTTRAP] Blocked: prompt injection detected."
+    conditions:
+      - field: contains_injection_patterns
+        match_type: boolean
+        value: true
+
+  - name: block_exfiltration
+    priority: 95
+    action: DENY
+    deny_message: "[AGENTTRAP] Blocked: data exfiltration attempt."
+    conditions:
+      - field: contains_exfiltration
+        match_type: boolean
+        value: true
+
+  - name: block_role_impersonation
+    priority: 90
+    action: DENY
+    deny_message: "[AGENTTRAP] Blocked: role impersonation detected."
+    conditions:
+      - field: contains_role_impersonation
+        match_type: boolean
+        value: true
+
+  - name: block_malware
+    priority: 85
+    action: DENY
+    deny_message: "[AGENTTRAP] Blocked: malware request detected."
+    conditions:
+      - field: contains_malware_request
+        match_type: boolean
+        value: true
+
+  - name: block_harm
+    priority: 80
+    action: DENY
+    deny_message: "[AGENTTRAP] Blocked: harmful content detected."
+    conditions:
+      - field: contains_harm_patterns
+        match_type: boolean
+        value: true
+
+  - name: block_obfuscation
+    priority: 75
+    action: DENY
+    deny_message: "[AGENTTRAP] Blocked: obfuscation detected."
+    conditions:
+      - field: contains_obfuscation
+        match_type: boolean
+        value: true
+
+  - name: block_sensitive_paths
+    priority: 70
+    action: DENY
+    deny_message: "[AGENTTRAP] Blocked: sensitive path access attempt."
+    conditions:
+      - field: contains_sensitive_paths
+        match_type: boolean
+        value: true
+
+  - name: block_high_risk
+    priority: 65
+    action: DENY
+    deny_message: "[AGENTTRAP] Blocked: high risk score."
+    conditions:
+      - field: risk_score
+        match_type: threshold
+        value: 0.2
+
+  - name: block_credential_access
+    priority: 60
+    action: DENY
+    deny_message: "[AGENTTRAP] Blocked: credential access attempt."
+    conditions:
+      - field: intent_category
+        match_type: exact
+        value: credential_access
+
+  - name: block_system_commands
+    priority: 55
+    action: DENY
+    deny_message: "[AGENTTRAP] Blocked: system command detected."
+    conditions:
+      - field: contains_system_commands
+        match_type: boolean
+        value: true
+
+  - name: log_medium_risk
+    priority: 30
+    action: LOG
+    conditions:
+      - field: risk_score
+        match_type: threshold
+        value: 0.1
+
+egress_rules:
+  - name: log_high_risk_response
+    description: "Log high risk responses"
+    priority: 50
+    action: LOG
+    conditions:
+      - field: risk_score
+        match_type: threshold
+        value: 0.7
+
+rate_limits:
+  requests_per_minute: 60
+  requests_per_hour: 500
+  burst_threshold: 10

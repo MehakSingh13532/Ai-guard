@@ -1,0 +1,198 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/redguard/redguard/blob/main/redguard/datasets/schema.json",
+  "title": "RedGuard Benchmark Dataset Entry",
+  "description": "Schema for a single benchmark probe entry in the RedGuard dataset.",
+  "type": "object",
+  "required": [
+    "id",
+    "title",
+    "attack_family",
+    "attack_variant",
+    "scenario",
+    "difficulty",
+    "threat_model",
+    "attacker_capability",
+    "prompt",
+    "expected_behavior",
+    "failure_behavior",
+    "attack_goal",
+    "evaluation_rules",
+    "references",
+    "probe_version",
+    "dataset_version"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^RG-[A-Z]{2,4}-[0-9]{3}$",
+      "description": "Stable benchmark instance identifier. Format: RG-{FAMILY_PREFIX}-{NNN}. Example: RG-DI-001",
+      "examples": ["RG-DI-001", "RG-CI-003", "RG-MP-002"]
+    },
+    "title": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 100,
+      "description": "Human-readable probe title."
+    },
+    "attack_family": {
+      "type": "string",
+      "enum": [
+        "direct_injection",
+        "content_injection",
+        "memory_poisoning",
+        "tool_manipulation",
+        "planning_manipulation",
+        "goal_diversion",
+        "data_exfiltration",
+        "autonomous_actions"
+      ],
+      "description": "The top-level attack family this probe belongs to."
+    },
+    "attack_variant": {
+      "type": "string",
+      "minLength": 2,
+      "description": "Specific attack variant within the family. Must match the probe renderer key."
+    },
+    "scenario": {
+      "type": "string",
+      "enum": [
+        "generic",
+        "github_issue",
+        "gitlab_issue",
+        "reddit_post",
+        "forum_discussion",
+        "documentation_page",
+        "wiki",
+        "support_ticket",
+        "email_assistant",
+        "calendar_assistant",
+        "travel_assistant",
+        "banking_assistant",
+        "shopping_assistant"
+      ],
+      "description": "The scenario in which this instance is evaluated."
+    },
+    "difficulty": {
+      "type": "string",
+      "enum": ["trivial", "easy", "medium", "hard", "expert"],
+      "description": "Relative difficulty of the probe for a typical LLM agent."
+    },
+    "threat_model": {
+      "type": "string",
+      "enum": [
+        "adversarial_user",
+        "malicious_third_party_content",
+        "compromised_tool",
+        "insider_threat",
+        "supply_chain"
+      ],
+      "description": "Who the attacker is in this threat model."
+    },
+    "attacker_capability": {
+      "type": "string",
+      "enum": [
+        "prompt_level",
+        "document_level",
+        "tool_output_level",
+        "memory_level",
+        "network_level"
+      ],
+      "description": "The level of access the attacker has to influence agent inputs."
+    },
+    "prompt": {
+      "type": "string",
+      "minLength": 10,
+      "description": "The attack prompt or document content to present to the agent. This is the verbatim input."
+    },
+    "expected_behavior": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of what a secure agent should do when encountering this probe."
+    },
+    "failure_behavior": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Description of what an insecure agent does (i.e., how the attack succeeds)."
+    },
+    "attack_goal": {
+      "type": "string",
+      "minLength": 5,
+      "description": "High-level description of what the attacker is trying to achieve."
+    },
+    "evaluation_rules": {
+      "type": "object",
+      "required": ["success_indicators", "blocked_indicators"],
+      "additionalProperties": false,
+      "properties": {
+        "success_indicators": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 1,
+          "description": "Strings/patterns that, if found in the agent response, indicate attack success."
+        },
+        "blocked_indicators": {
+          "type": "array",
+          "items": {"type": "string"},
+          "minItems": 1,
+          "description": "Strings/patterns that indicate the attack was blocked."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional clarification on how to interpret the evaluation rules."
+        }
+      }
+    },
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["title", "year"],
+        "properties": {
+          "title": {"type": "string"},
+          "authors": {"type": "array", "items": {"type": "string"}},
+          "year": {"type": "integer", "minimum": 2020},
+          "venue": {"type": "string"},
+          "arxiv_id": {"type": "string"},
+          "url": {"type": "string"}
+        }
+      },
+      "minItems": 1,
+      "description": "Academic references supporting this probe design."
+    },
+    "tags": {
+      "type": "array",
+      "items": {"type": "string"},
+      "uniqueItems": true,
+      "description": "Free-form tags for probe categorization and filtering."
+    },
+    "affected_layers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["llm", "orchestrator", "tools", "memory", "policy", "data"]
+      },
+      "description": "Which layers of the agent stack this probe targets."
+    },
+    "probe_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semver version of this specific probe definition."
+    },
+    "dataset_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+      "description": "Semver version of the dataset this probe belongs to."
+    },
+    "synthetic": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this probe was synthetically generated (true) or adapted from a real-world incident (false)."
+    },
+    "research_notes": {
+      "type": "string",
+      "description": "Optional notes about this probe for reviewers and researchers."
+    }
+  }
+}
